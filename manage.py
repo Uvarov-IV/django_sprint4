@@ -1,0 +1,1 @@
+blogicum/manage.py
