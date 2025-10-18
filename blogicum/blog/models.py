@@ -2,7 +2,7 @@ from django.contrib.auth import get_user_model
 from django.db import models
 
 User = get_user_model()
-LENGHT_TITLES = 256
+LENGTH_TITLES = 256
 
 
 class PublishedCreatedModel(models.Model):
@@ -21,7 +21,7 @@ class PublishedCreatedModel(models.Model):
 
 class Location(PublishedCreatedModel):
     name = models.CharField(
-        max_length=LENGHT_TITLES, verbose_name="Название места"
+        max_length=LENGTH_TITLES, verbose_name="Название места"
     )
 
     class Meta(PublishedCreatedModel.Meta):
@@ -34,7 +34,7 @@ class Location(PublishedCreatedModel):
 
 class Category(PublishedCreatedModel):
     title = models.CharField(
-        max_length=LENGHT_TITLES, verbose_name="Заголовок"
+        max_length=LENGTH_TITLES, verbose_name="Заголовок"
     )
     description = models.TextField(verbose_name="Описание")
     slug = models.SlugField(
@@ -56,7 +56,7 @@ class Category(PublishedCreatedModel):
 
 class Post(PublishedCreatedModel):
     title = models.CharField(
-        max_length=LENGHT_TITLES, verbose_name="Заголовок"
+        max_length=LENGTH_TITLES, verbose_name="Заголовок"
     )
     text = models.TextField(verbose_name="Текст")
     image = models.ImageField(
@@ -112,7 +112,10 @@ class Comment(models.Model):
         auto_now_add=True, verbose_name="Добавлено"
     )
     author = models.ForeignKey(
-        User, on_delete=models.CASCADE, verbose_name="Автор комментария"
+        User,
+        on_delete=models.CASCADE,
+        related_name="comments",
+        verbose_name="Автор комментария"
     )
 
     class Meta:

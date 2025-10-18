@@ -1,6 +1,7 @@
-from blog.forms import UserRegistrationView
 from django.urls import path
 from django.views.generic import TemplateView
+
+from . import views
 
 app_name = "pages"
 
@@ -17,7 +18,7 @@ urlpatterns = [
     ),
     path(
         "auth/registration/",
-        UserRegistrationView.as_view(),
+        views.UserRegistrationView.as_view(),
         name="registration"
     ),
 ]

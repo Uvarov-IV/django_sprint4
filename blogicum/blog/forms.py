@@ -1,7 +1,6 @@
 from django import forms
 from django.contrib.auth import get_user_model
-from django.contrib.auth.forms import UserChangeForm, UserCreationForm
-from django.views.generic import CreateView
+from django.contrib.auth.forms import UserChangeForm
 
 from .models import Comment, Post
 
@@ -28,9 +27,19 @@ class CustomUserChangeForm(UserChangeForm):
 class PostForm(forms.ModelForm):
     class Meta:
         model = Post
-        fields = ["title", "text", "image", "pub_date", "location", "category"]
+        fields = [
+            "title",
+            "text",
+            "image",
+            "pub_date",
+            "location",
+            "category",
+        ]
         widgets = {
-            "pub_date": forms.DateTimeInput(attrs={"type": "datetime-local"}),
+            "pub_date": forms.DateTimeInput(
+                attrs={"type": "datetime-local"},
+                format="%Y-%m-%dT%H:%M",
+            ),
             "text": forms.Textarea(attrs={"rows": 4}),
         }
 
@@ -42,9 +51,3 @@ class CommentForm(forms.ModelForm):
         widgets = {
             "text": forms.Textarea(attrs={"rows": 3}),
         }
-
-
-class UserRegistrationView(CreateView):
-    form_class = UserCreationForm
-    template_name = "registration/registration_form.html"
-    success_url = "/auth/login/"

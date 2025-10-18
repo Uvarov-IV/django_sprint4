@@ -1,5 +1,13 @@
 from django.shortcuts import render
 from django.views.decorators.csrf import requires_csrf_token
+from django.views.generic import CreateView
+from django.contrib.auth.forms import UserCreationForm
+from django.urls import reverse_lazy
+
+class UserRegistrationView(CreateView):
+    form_class = UserCreationForm
+    template_name = "pages/registration.html"
+    success_url = reverse_lazy("pages:about")
 
 
 @requires_csrf_token
@@ -13,11 +21,3 @@ def page_not_found(request, exception):
 
 def server_error(request):
     return render(request, "pages/500.html", status=500)
-
-
-def about(request):
-    return render(request, "pages/about.html")
-
-
-def rules(request):
-    return render(request, "pages/rules.html")

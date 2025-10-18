@@ -14,7 +14,7 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 
-from blog.forms import UserRegistrationView
+
 from django.contrib import admin
 from django.urls import include, path
 
@@ -23,13 +23,9 @@ urlpatterns = [
     path("", include("blog.urls")),
     path("pages/", include("pages.urls")),
     path("auth/", include("django.contrib.auth.urls")),
-    path(
-        "auth/registration/",
-        UserRegistrationView.as_view(),
-        name="registration"
-    ),
+
 ]
 
-handler403 = "pages.views.csrf_failure"
+
 handler404 = "pages.views.page_not_found"
 handler500 = "pages.views.server_error"
