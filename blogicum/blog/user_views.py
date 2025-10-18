@@ -19,17 +19,17 @@ def get_posts_manager(
     annotate_comments=True
 ):
     queryset = manager.select_related("category", "location", "author")
-    
+
     if apply_filters:
         queryset = queryset.filter(
             is_published=True,
             category__is_published=True,
             pub_date__lte=timezone.now(),
         )
-    
+
     if annotate_comments:
         queryset = queryset.annotate(comment_count=Count("comments"))
-    
+
     return queryset.order_by("-pub_date")
 
 
@@ -45,7 +45,7 @@ def get_paginated_page(
 
 def profile(request, username):
     profile_user = get_object_or_404(User, username=username)
-    
+
     if request.user == profile_user:
         posts_query = get_posts_manager(
             manager=profile_user.posts,  # type: ignore
@@ -58,9 +58,9 @@ def profile(request, username):
             apply_filters=True,
             annotate_comments=True
         )
-    
+
     page_obj = get_paginated_page(request, posts_query)
-    
+
     return render(
         request,
         "blog/profile.html",
@@ -79,17 +79,17 @@ def post_create(request):
             return redirect("blog:profile", username=request.user.username)
     else:
         form = PostForm()
-    
+
     return render(request, "blog/create.html", {"form": form})
 
 
 @login_required
 def post_edit(request, post_id):
     post = get_object_or_404(Post, id=post_id)
-    
+
     if post.author != request.user:
         return redirect("blog:post_detail", post_id=post_id)
-    
+
     if request.method == "POST":
         form = PostForm(
             request.POST or None,
@@ -101,14 +101,14 @@ def post_edit(request, post_id):
             return redirect("blog:post_detail", post_id=post_id)
     else:
         form = PostForm(instance=post)
-    
+
     return render(request, "blog/create.html", {"form": form})
 
 
 @login_required
 def add_comment(request, post_id):
     post = get_object_or_404(Post, id=post_id)
-    
+
     if request.method == "POST":
         form = CommentForm(request.POST or None)
         if form.is_valid():
@@ -116,7 +116,7 @@ def add_comment(request, post_id):
             comment.post = post
             comment.author = request.user
             comment.save()
-    
+
     return redirect("blog:post_detail", post_id=post_id)
 
 
@@ -127,10 +127,10 @@ def edit_comment(request, post_id, comment_id):
         id=comment_id,
         post_id=post_id
     )
-    
+
     if comment.author != request.user:
         raise Http404("Comment not found")
-    
+
     if request.method == "POST":
         form = CommentForm(request.POST or None, instance=comment)
         if form.is_valid():
@@ -138,7 +138,7 @@ def edit_comment(request, post_id, comment_id):
             return redirect("blog:post_detail", post_id=post_id)
     else:
         form = CommentForm(instance=comment)
-    
+
     return render(
         request,
         "blog/comment.html",
@@ -153,25 +153,25 @@ def delete_comment(request, post_id, comment_id):
         id=comment_id,
         post_id=post_id
     )
-    
+
     if comment.author != request.user:
         raise Http404("Comment not found")
-    
+
     if request.method == "POST":
         comment.delete()
         return redirect("blog:post_detail", post_id=post_id)
-    
+
     return render(request, "blog/delete_comment.html", {"comment": comment})
 
 
 @login_required
 def post_delete(request, post_id):
     post = get_object_or_404(Post, id=post_id, author=request.user)
-    
+
     if request.method == "POST":
         post.delete()
         return redirect("blog:profile", username=request.user.username)
-    
+
     form = PostForm(instance=post)
     return render(request, "blog/detail.html", {"post": post, "form": form})
 
@@ -185,5 +185,5 @@ def edit_profile(request):
             return redirect("blog:profile", username=request.user.username)
     else:
         form = UserForm(instance=request.user)
-    
+
     return render(request, "blog/edit_profile.html", {"form": form})

@@ -15,7 +15,7 @@ def get_posts_queryset(user=None):
     queryset = Post.objects.select_related(
         "category", "location", "author"
     ).annotate(comment_count=Count("comments"))
-    
+
     if user is None or not user.is_authenticated:
         queryset = queryset.filter(
             is_published=True,
@@ -28,7 +28,7 @@ def get_posts_queryset(user=None):
             category__is_published=True,
             pub_date__lte=timezone.now(),
         )
-    
+
     return queryset.order_by("-pub_date")
 
 
@@ -45,20 +45,20 @@ def post_detail(request, post_id):
         Post.objects.select_related("category", "location", "author"),
         id=post_id
     )
-    
+
     is_visible = (
         post.is_published
         and post.pub_date <= timezone.now()
         and post.category
         and post.category.is_published
     )
-    
+
     if not is_visible and request.user != post.author:
         post = get_object_or_404(get_posts_queryset(), id=post_id)
-    
+
     form = CommentForm()
     comments = post.comments.select_related("author")  # type: ignore
-    
+
     return render(
         request,
         "blog/detail.html",
