@@ -1,17 +1,22 @@
 from django.urls import path
 
 from . import views
-from .user_views import (add_comment, delete_comment, edit_comment,
-                         edit_profile, post_create, post_delete, post_edit,
-                         profile)
+from .views import (
+    add_comment, delete_comment, edit_comment,
+    edit_profile, post_create, post_delete, post_edit,
+    profile
+)
 
 app_name = "blog"
 
 urlpatterns = [
     path("", views.index, name="index"),
     path("posts/<int:post_id>/", views.post_detail, name="post_detail"),
-    path("category/<slug:category_slug>/", views.category_posts,
-         name="category_posts"),
+    path(
+        "category/<slug:category_slug>/",
+        views.category_posts,
+        name="category_posts"
+    ),
     path("profile/edit/", edit_profile, name="edit_profile"),
     path("profile/<str:username>/", profile, name="profile"),
     path("create/", post_create, name="create_post"),
