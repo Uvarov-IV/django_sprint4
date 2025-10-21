@@ -7,7 +7,7 @@ from .models import Post
 
 
 def get_posts_queryset(
-    user=None, manager=Post.objects, apply_filters=True, annotate_comments=True
+    manager=Post.objects, apply_filters=True, annotate_comments=True
 ):
     queryset = manager.select_related("category", "location", "author")
 

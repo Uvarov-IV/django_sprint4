@@ -1,35 +1,36 @@
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth import get_user_model
 from django.http import Http404
-from django.utils import timezone
+
 
 from .forms import CommentForm, PostForm, UserForm
 from .models import Category, Comment, Post
 from .utils import get_paginated_page, get_posts_queryset
 
 
+User = get_user_model()
+
+
 def index(request):
-    post_list = get_posts_queryset(request.user)
+    post_list = get_posts_queryset()
     page_obj = get_paginated_page(request, post_list)
     return render(request, "blog/index.html", {"page_obj": page_obj})
 
 
 def post_detail(request, post_id):
     post = get_object_or_404(
-        Post.objects.select_related("category", "location", "author"),
+        get_posts_queryset(apply_filters=False),
         id=post_id
     )
-
-    if (
-        not post.is_published
-        or post.pub_date > timezone.now()
-        or not post.category.is_published  # type: ignore
-    ):
-        if request.user != post.author:
-            raise Http404("Post not found")
+    if request.user != post.author:
+        post = get_object_or_404(
+            get_posts_queryset(),
+            id=post_id
+        )
 
     form = CommentForm()
-    comments = post.comments.select_related("author")  # type: ignore
+    comments = post.comments.select_related("author")
 
     return render(
         request,
@@ -42,9 +43,7 @@ def category_posts(request, category_slug):
     category = get_object_or_404(
         Category, slug=category_slug, is_published=True
     )
-    post_list = get_posts_queryset(
-        request.user, manager=category.posts  # type: ignore
-    )
+    post_list = get_posts_queryset(manager=category.posts)
     page_obj = get_paginated_page(request, post_list)
     return render(
         request,
@@ -54,14 +53,10 @@ def category_posts(request, category_slug):
 
 
 def profile(request, username):
-    from django.contrib.auth import get_user_model
-
-    User = get_user_model()
-
     profile_user = get_object_or_404(User, username=username)
 
     posts_query = get_posts_queryset(
-        manager=profile_user.posts,  # type: ignore
+        manager=profile_user.posts,
         apply_filters=(request.user != profile_user),
         annotate_comments=True,
     )
@@ -120,9 +115,7 @@ def add_comment(request, post_id):
 
 @login_required
 def edit_comment(request, post_id, comment_id):
-    comment = get_object_or_404(
-        Comment, id=comment_id, post_id=post_id
-    )
+    comment = get_object_or_404(Comment, id=comment_id, post_id=post_id)
 
     if comment.author != request.user:
         raise Http404("Comment not found")
@@ -139,9 +132,7 @@ def edit_comment(request, post_id, comment_id):
 
 @login_required
 def delete_comment(request, post_id, comment_id):
-    comment = get_object_or_404(
-        Comment, id=comment_id, post_id=post_id
-    )
+    comment = get_object_or_404(Comment, id=comment_id, post_id=post_id)
 
     if comment.author != request.user:
         raise Http404("Comment not found")
